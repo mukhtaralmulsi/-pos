@@ -1,0 +1,373 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+void main() {
+  runApp(const ContractingApp());
+}
+
+class ContractingApp extends StatelessWidget {
+  const ContractingApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'إدارة المقاولات الميدانية',
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ar', 'AE'),
+      ],
+      locale: const Locale('ar', 'AE'),
+      theme: ThemeData(
+        useMaterial3: true,
+        primaryColor: const Color(0xFF1E3A8A),
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF1E3A8A),
+          primary: const Color(0xFF1E3A8A),
+        ),
+      ),
+      home: const HomeScreen(),
+    );
+  }
+}
+
+// ------------------- الشاشة الرئيسية -------------------
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final List<Map<String, dynamic>> _projects = [
+    {
+      'code': 'PRJ-101',
+      'title': 'مجمع الأفق التجاري',
+      'client': 'شركة الاستثمار العقاري',
+      'progress': 0.65,
+      'status': 'قيد التنفيذ',
+    },
+    {
+      'code': 'PRJ-102',
+      'title': 'أبراج النخيل السكنية',
+      'client': 'وزارة الإسكان',
+      'progress': 0.30,
+      'status': 'قيد التنفيذ',
+    },
+    {
+      'code': 'PRJ-103',
+      'title': 'مستشفى الشفاء المركزي',
+      'client': 'الهيئة العامة للمشاريع',
+      'progress': 0.88,
+      'status': 'مرحلة التسليم',
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('المشاريع الميدانية', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: const Color(0xFF1E3A8A),
+        foregroundColor: Colors.white,
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          // لوحة المؤشرات
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2)),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildStatItem('المشاريع النشطة', '${_projects.length}', Colors.blue),
+                Container(height: 35, width: 1, color: Colors.grey.shade200),
+                _buildStatItem('تقارير اليوم', '2 مكتملة', Colors.green),
+                Container(height: 35, width: 1, color: Colors.grey.shade200),
+                _buildStatItem('مصاريف معلقة', '4 فواتير', Colors.orange),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'قائمة المشاريع',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+          ),
+          const SizedBox(height: 12),
+          ..._projects.map((proj) => _buildProjectCard(proj)),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          _showActionSheet(context);
+        },
+        backgroundColor: const Color(0xFF1E3A8A),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('إجراء ميداني جديد', style: TextStyle(color: Colors.white)),
+      ),
+    );
+  }
+
+  void _showActionSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.assignment, color: Colors.blue),
+                title: const Text('تسجيل تقرير يومي للموقع'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const DailyReportScreen()));
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.receipt_long, color: Colors.green),
+                title: const Text('تسجيل سند مصروفات / مشتريات'),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ExpenseScreen()));
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, Color color) {
+    return Column(
+      children: [
+        Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+      ],
+    );
+  }
+
+  Widget _buildProjectCard(Map<String, dynamic> proj) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(proj['code'], style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blue)),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
+                child: Text(proj['status'], style: const TextStyle(fontSize: 11, color: Colors.blue, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(proj['title'], style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text('المالك: ${proj['client']}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('نسبة الإنجاز', style: TextStyle(fontSize: 12, color: Colors.grey)),
+              Text('${(proj['progress'] * 100).toInt()}%', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          LinearProgressIndicator(
+            value: proj['progress'],
+            backgroundColor: Colors.grey.shade200,
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
+            minHeight: 6,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ------------------- شاشة التقرير اليومي -------------------
+class DailyReportScreen extends StatefulWidget {
+  const DailyReportScreen({super.key});
+
+  @override
+  State<DailyReportScreen> createState() => _DailyReportScreenState();
+}
+
+class _DailyReportScreenState extends State<DailyReportScreen> {
+  final _workersController = TextEditingController();
+  final _equipmentController = TextEditingController();
+  final _notesController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('تقرير الموقع اليومي'),
+        backgroundColor: const Color(0xFF1E3A8A),
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            TextField(
+              controller: _workersController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'عدد العمالة في الموقع اليوم',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.groups),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _equipmentController,
+              decoration: const InputDecoration(
+                labelText: 'المعدات العاملة (مثال: حَفّار 2، خلاطة 1)',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.precision_manufacturing),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _notesController,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                labelText: 'ملاحظات الأعمال المنجزة والطقس',
+                border: OutlineInputBorder(),
+                alignLabelWithHint: true,
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تم حفظ التقرير اليومي بنجاح')),
+                  );
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.save),
+                label: const Text('حفظ واعتماد التقرير'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ------------------- شاشة سند المصروفات -------------------
+class ExpenseScreen extends StatefulWidget {
+  const ExpenseScreen({super.key});
+
+  @override
+  State<ExpenseScreen> createState() => _ExpenseScreenState();
+}
+
+class _ExpenseScreenState extends State<ExpenseScreen> {
+  final _amountController = TextEditingController();
+  final _descController = TextEditingController();
+  String _category = 'مواد ومشتريات';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('تسجيل سند مصروفات'),
+        backgroundColor: const Color(0xFF1E3A8A),
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            DropdownButtonFormField<String>(
+              value: _category,
+              decoration: const InputDecoration(
+                labelText: 'نوع المصروف',
+                border: OutlineInputBorder(),
+              ),
+              items: ['مواد ومشتريات', 'أجور يومية', 'محروقات ونقل', 'نثريات موقع']
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (val) => setState(() => _category = val!),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _amountController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'المبلغ المستحق',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.attach_money),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _descController,
+              decoration: const InputDecoration(
+                labelText: 'البيان والتفاصيل',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.description),
+              ),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('تم ترحيل السند المالي بنجاح')),
+                  );
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.check_circle),
+                label: const Text('حفظ السند المالي'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade700,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
